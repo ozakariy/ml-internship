@@ -1,0 +1,12 @@
+metric,value
+n_features_total,252.0
+n_features_qc_cv_lt_30_qc_only,193.0
+fraction_qc_cv_lt_30_qc_only,0.7658730158730159
+n_features_qc_cv_lt_30_dqc_only,185.0
+fraction_qc_cv_lt_30_dqc_only,0.7341269841269841
+n_features_stable_in_both,158.0
+n_features_qc_stable_but_dqc_unstable,35.0
+median_qc_cv_qc_only,19.775227789232304
+median_qc_cv_dqc_only,26.533802437286507
+median_abs_qc_drift_qc_only,0.33181818181818185
+median_abs_qc_drift_dqc_only,0.8999999999999998

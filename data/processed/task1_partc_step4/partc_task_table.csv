@@ -1,0 +1,5 @@
+task_name,task_type,positive_class,negative_class,task_label
+French_vs_Dunn,pairwise,French,Dunn,Lung cancer vs healthy
+French_vs_LMU,pairwise,French,LMU,Lung cancer vs benign disease
+LMU_vs_Dunn,pairwise,LMU,Dunn,Benign disease vs healthy
+three_class_overview,multiclass,,,Three-class overview

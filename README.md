@@ -1,201 +1,430 @@
-&nbsp; 
-&nbsp; 
-&nbsp; 
-[<img src="public/221006-logo-isospec-color.jpg" width="250" align="right">]()
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-&nbsp; 
-# Machine Learning Internship Assignment 
+Yes — for the submission, you should replace the current assignment-style `README.md` with a **project README**.
 
+The current one is mostly the internship brief, while the assignment explicitly asks for a **comprehensive README explaining setup and workflow**. Your repo already has a clear project structure with dedicated notebooks for Task 1 and Task 2, reusable logic in `src/`, and a reflection file, so the README should describe **your implementation**, not restate the prompt. That matches both the assignment requirement and the codebase you built.
 
-&nbsp; 
-&nbsp; 
+Below is a full copiable `README.md` you can paste in place of the current one.
 
-Welcome to your internship assignment! This two-week challenge is designed to evaluate your data science and machine learning capabilities through two interconnected tasks that reflect our team's actual workflow.
+````md
+# Machine Learning Internship Assignment — Glycan Biomarker Discovery and Embedding
 
-Our will is that after completion, you have a rough understanding of the domain and a first taste of how your internship would unfold. 
+This repository contains my submission for the ISOSPEC machine learning internship assignment. The work is organized as a reproducible analysis pipeline covering:
 
-We will introduce to you the domain of glycobiology and the tools we use to characterize glycans. You are not expected to be an expert in the domain and 
-we will provide you with the necessary background. In any case we also provide you with complementary resources for further explanation.
+- **Task 1 — Biomarker Discovery**
+  Exploratory data analysis, data processing, feature/sample filtering, and discriminatory analysis on LC-MS glycomics data.
 
-The assignment has two parts, a first more focused on data exploration, processing, and statistical analysis. The second is more focused on machine learning. We aim to assess your abilty to observe, question and test in the first part (scientific method) followed by your ability to structure for training, evaluating and creating value with machine learning. 
+- **Task 2 — Biomarker Embedding**
+  Construction and evaluation of an interpretable glycan embedding workflow using the provided glycan resources and `glycowork`.
 
-**Important Note:** You have to be cautious on time management, we recommend a 40-60 split between the two parts. We understand EDA and data wrangling can be time consumming so make sure not to fall into that trap. 
+The project is structured so that the main analysis is presented in notebooks, while reusable logic is implemented in `src/`.
 
-Enjoy :) ! 
-## Introduction: What are Glycans?
-Glycans are complex sugar molecules that attach to proteins and lipids on cell surfaces and in blood, playing crucial roles in cellular communication, immune response, and disease progression. These molecules undergo significant changes during disease development, making them valuable biomarkers for early detection and monitoring of various conditions including cancer. Their presence in blood and structural diversity make glycans particularly attractive targets for diagnostic development, as changes in their abundance or composition can signal specific disease states before other symptoms appear.
+---
 
-## Task 01: Biomarker Discovery
-In this first phase, you are provided with a task that is very similar to the typical data science tasks our team has to work on. Your role is to find biological differences in molecular expression specific to disease patients or healthy controls. Your skills should allow you to understand the data you are provided, clear out the noise and extract the signal we are after. In the typical workflow at ISOSPEC this means finding molecules of interest that we later on characterize with our proprietary breakthrough technology (CIRIS). 
-### Background
+## 1. Project goals
 
-#### Chromatographic Peaks
+### Task 1 — Biomarker Discovery
+The objective is to identify biologically meaningful glycan-related LC-MS features that differentiate:
+- **French** = lung cancer
+- **LMU** = benign disease
+- **Dunn** = healthy
 
-After data engineering team processed the results from LC-MS experiments of lung cancer patients cohort study run by our laboratory, you are looking to analyse the differential expression of glycans between classes of interest, namely disease and control. Molecules under study are cleaved glycans off of proteins running in blood samples. Experiment read out consists of list of Chromatographic peaks, that can be described with three main information points: Retention time (time took to migrate through LC column) indicative of the molecules conformation, Mass to charge ratio from the detector, indicative of mass composition and intensity of detection, absolute value indicative of abundance of the molecule. Chromatographic peaks height (intensity) and shape are important information to assess the quality of the signal and the relative abundance of the molecule. As such the peak area, integration of the curve in the time domain bound by peak start and end is the metric used to quantify presence.
+The workflow is divided into:
+1. **Part A — EDA**: audit the experiment, understand technical vs biological variability, inspect contamination, QC behavior, detection support, standards, and signal trends.
+2. **Part B — Processing**: define a defensible filtering strategy for features and samples.
+3. **Part C — Discriminatory analysis**: prioritize a biomarker shortlist using statistical and predictive evidence.
 
-Put simply:
+### Task 2 — Biomarker Embedding
+The objective is to place discovered glycans in a broader glycobiology context by building an embedding space from:
+- glycan sequences
+- composition
+- tissue/sample metadata
+- species metadata
+- protein-binding information
 
-• Retention time shows when molecule emerges from the column\
-• Mass to charge ratio indicates molecular composition\
-• Peak intensity represents molecule abundance\
-• Peak area is our quantitative measure
+The workflow emphasizes interpretable baselines first, then evaluates whether the learned representation captures meaningful glycan relationships.
 
-#### LC-MS Experiments
+---
 
-LC-MS experiments follow a strict framework to reduce the **variability of the analytical platform** in the data. This framework is composed of different blocks reproduced identically through multiple batches. A schematic description of a batch is shown below:
-![Sample List Organization](public/sample-list.png)
+## 2. Repository structure
 
-*Figure 1: Schematic representation of a typical batch showing the order and organization of different sample types. Blanks and System Suitability samples are run first, followed by alternating patterns of disease samples, controls, and quality checks.*
-In essence, a block contains different sample types or "class" run in a specific order:
-- **Blank samples**: No biological information, used to assess contaminants. Consider the Zero, Solvant and Blank samples of the schema. 
-- **System Suitability (SS)**: Contains exogenous standards for monitoring detector behavior. Consider the SSS and SS Conditionnig samples of the schema. Experimental_blank is considered as a SS sample.
-- **Disease/Control samples**: Main samples of interest, in the schema shown as RM and SRM. 
-- **Quality Checks (QC or dQC)**: Mixture of all samples to monitor signal consistency. Pooled QC in the schema. dQC is a diluted version of the QC and can also be considered a normal QC 
+```text
+ml-internship/
+├── data/
+│   ├── input/
+│   │   ├── internship_data_matrix.csv
+│   │   ├── internship_feature_metadata.csv
+│   │   ├── intership_acquisition_list.csv
+│   │   └── exogenous_standards.csv
+│   ├── glycan_embedding/
+│   │   ├── glycan_list.csv
+│   │   ├── df_glycan.pkl
+│   │   ├── glycan_binding.pkl
+│   │   └── N_glycans_df.pkl
+│   └── processed/
+│       └── ...
+├── notebooks/
+│   ├── 01_task1_biomarker_discovery_partA_eda.ipynb
+│   ├── 02_task1_biomarker_discovery_partB_processing.ipynb
+│   ├── 03_task1_biomarker_discovery_partC_discriminatory_analysis.ipynb
+│   └── 04_task2_biomarker_embedding.ipynb
+├── public/
+│   └── sample-list.png
+├── src/
+│   ├── eda.py
+│   ├── load_data.py
+│   ├── task1_processing.py
+│   ├── task1_filtering.py
+│   ├── task1_discriminatory.py
+│   ├── task1_finalize.py
+│   └── task2_embedding.py
+├── reflection.md
+├── pyproject.toml
+├── requirements.txt
+└── README.md
+````
 
-Do not worry about the technical details of the experiment, you must gather at this stage samples have different class and purposes within the experiment. 
-Your input data is summarized in three files, all in `data/input` in csv format:
-1. **Data Matrix** (NxM): 
-- Rows: Sample IDs (N samples) 
-- Columns: Feature IDs (M features) 
-- Values: Peak areas
+### Directory roles
 
-2. **Feature Metadata** (MxK): 
-- Rows: Feature IDs (M features)
-- Columns: Feature descriptors (RT, m/z) (K descriptors)
-3. **Acquisition List** (NxD): 
-- Sample metadata including batch and run order (D descriptors)
-- Rows: Sample IDs (N samples)
-4. **Exogenous Standards** (Sxk):
- - Rows: Exogenous standards IDs (S standards): They are identified by GUn corresponding to the glycan unit, e.g. GU4 is composed of four glycan units from a Maltodextrin ladder.
-  - Columns: Feature descriptors (RT, m/z) (k descriptors)
+* `data/input/`: raw Task 1 LC-MS inputs
+* `data/glycan_embedding/`: raw Task 2 glycan resources
+* `data/processed/`: intermediate and final processed outputs
+* `notebooks/`: analysis narrative and figures
+* `src/`: reusable functions and pipeline logic
+* `reflection.md`: time spent, difficulties, decisions, and feedback
 
-### A - Exploratory Data Analysis
-Your first task is to inspect the data, understand the dynamics at hand and perform necessary analysis to assess if the experiments is exploitable for biomarker discovery. 
+---
 
-As the analytical platform can introduce measurement bias, it's crucial to monitor both technical variability (from the instrument) and biological variability (true differences between samples).
+## 3. Environment setup
 
-Some metrics to consider:
-- Coefficient of variation (CV): Captures variability in peak area across samples
-- D-Ratio: Compares technical to biological variation
+This project was designed to run with the dependencies declared in `pyproject.toml`, with `requirements.txt` also available as a pinned fallback export.
 
-You can find more on these metrics in the resources section.
+### Option A — using `uv` (recommended)
 
+```bash
+uv sync
+```
 
-To guide your analysis, consider these questions:
-1. Are there features that could correspond to isomers (same mass but diffrent retention time)?
-2. Are there features that could correspond to isotopes or adducts (same retention time but different mass)
-3. Is there any correlation (in terms of peak area) between isomers ? between isotopes? 
-4. How many features have been detected, how is the distribution of detection rate across mz and retention time, and across classes? **NB:** you can set a threshold of minimal intensity to consider a peak detected. 
-   - How do you interpret differences between QC classes and sample classes? Does it correspond to an expected behavior? 
-5. How is the contamination in the experiment? How would you mitigate this effect moving forward?
-6. Are the standards detected consistently across the experiment?
-7. How is the distribution of intensities across the classes? Are there any trends with respect to classes, run order? 
-   - How do you interpret differences? Does it correspond to expected behavior? 
-8. How are QCs between the batches? How would you qualify measurement stability?
+### Option B — using `pip`
 
-You are encouraged to provide figures, summary statistics to motivate any insights you gather. Feel free to expand from these questions to interrogate other aspects of the data. Make sure to analyze each figure, we judge the quality of the EDA from your ability to connect discoveries. It is preferred to limit the insights to a few but thouroughly explored rather than point out various obervations wihtout much depth. 
+Create and activate a virtual environment, then install dependencies:
 
-**Important Note:** For the following parts of this exercise we ask you to limit the analysis to only batch1 since batch2 does not contain any sample data.
-### B - Data Processing
-As you go about finding discriminative signals, you'll need to process your features in order to ensure consistency in their detection and comparability between samples. For that, filtering of the features and of the samples investigated is key for meaningful discovery. Think of this as cleaning your signal - just as a radio needs tuning to pick up a clear broadcast, we need to tune our data to hear the biological signal clearly through the technical noise.
-Qualitative features should follow at least these criteria:
-- Limited variability across samples of the same class (<30% on the QC)
-- Consistent support in detection (>=70%) on the same class
-- Within mass range of interest (Glycans > 500 m/z)
+```bash
+python -m venv .venv
+```
 
-Make sure to interrogate the samples as well - as errors can happen! Monitor the sample-to-sample intensity variations and check for possible transformations that could improve comparability. 
+**Windows**
 
-The instrument accuracy and experimental conditions vary as the run goes on, as such this step is critical to monitor the impact on the detected features. Questioning intensities here is central!
+```bash
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-The output of this phase should be a list of features and samples you will leverage for doing biomarker discovery. You should provide justifications for their selection or the removal of others - every choice matters when we're looking for reliable biomarkers.
+**macOS / Linux**
 
-### C - Discriminatory Analysis 
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-In this final step your role is to showcase your skills for extracting meaningful patterns from our experimental data. You will leverage the curated list of features to find a subset of them that captures most biological differences between classes. Here, little guidance is provided as we expect motivating the discovery of a biomarker should be one of your strong suits. Keep in mind that statistical significance, predictive power and decision boundaries are important concepts when justifying such discovery. A sense of hierarchy should also be provided in the final list of targets.
+### Jupyter kernel
 
-**Important Note:** You can consider the following class mapping for the analysis:
-- French: Lung cancer
-- LMU: Benign disease
-- Dunn: Healthy
+If needed:
 
-## Task 02: Biomarker Embedding
-In this second phase, your role is to provide interpretation power to your findings. Following the discovery of a biomarker, you are tasked with leveraging third party knowledge around the structure you identified to provide more insights on the origin of this glycan, other diseases it has been identified and proteins it is related to. 
-The laboratory team has successfully identified your discovered molecules using CIRIS technology, providing glycan sequences and structural compositions in the `glycan_list.csv` file. Now comes the exciting challenge of placing these discoveries in the broader context of glycobiology.
-You have access to the glycowork library, a comprehensive glycan dataset which contains, as described by the authors:
-- df_glycan: contains ~50,500 unique glycan sequences, including labels such as ~39,500 species associations, ~20,000 tissue associations, and ~1,000 disease associations
-- glycan_binding: contains >790,000 protein-glycan binding interactions, from >2,000 unique glycan-binding proteins
+```bash
+python -m ipykernel install --user --name ml-internship --display-name "ml-internship"
+```
 
-Your task is to create an embedding space for the glycan libraries that captures meaningful relationships between molecules such as sequence proximity, origin similarity, disease commonalities and proteins they interact with. You will then embed your discovered glycans and assess their closeness to other structures to draw conclusions as to their nature. The embedding space can be learned by leveraging the features provided in the glycan_list columns: 
- - `glycan_sequence`: Glycan sequence
- - `composition`: Composition of the glycan
- - `tissue_sample`: Medium sample collected
- - `tissue_species`: Species associated with the sample collected
+---
 
-You can validate your learned representation by assessing the closeness of the N-glycans in the new embedding space. The N-glycans list is provided in the N-Glycans.pkl. You can refer to the glycowork notebooks [glycowork example notebooks](https://github.com/BojarLab/glycowork/blob/master/) for more information on the N-glycans.
-For this task, head to the data/glycan_embedding folder. You will find the following files:
-- glycan_list.csv: The list of glycans you will embed for inference and enrichment.
-- df_glycan.pkl: The glycan sequences to use for the learning of the embedding space.
-- glycan_binding.pkl: The protein-glycan binding interactions to enrich the embedding space.
-- N_glycans_df.pkl: The N-glycans sequences to use for control representation of the embedding space (also used for learning the embedding space)
+## 4. How to run the project
 
-The expected output is the enriched list of glycans with information as well as evidence for the utility of the embedding space you created. The more new information you can gather on the structures, the better. Be creative in the approaches you consider - any choice should be justified and insights drawn motivated.
+Open the notebooks in order:
 
-In this part, we are very interested in your approach in setting up a machine learning model. As such we expect you to build understanding with simpler, more interpretable algorithms to bechmark performances. You can than build up with more complex architectures and provide numerical evidence of the improvements provided. 
-# Submission Process
-### Repository Setup
+1. `notebooks/01_task1_biomarker_discovery_partA_eda.ipynb`
+2. `notebooks/02_task1_biomarker_discovery_partB_processing.ipynb`
+3. `notebooks/03_task1_biomarker_discovery_partC_discriminatory_analysis.ipynb`
+4. `notebooks/04_task2_biomarker_embedding.ipynb`
 
-1. Clone the assignment repository from this [repository](https://github.com/isospec/ml-internship) to your own repository.
-2. Create a new branch for your work, in your own repository.
-3. Commit your changes regularly with clear, descriptive messages.
-4. When complete, create a pull request, in your repository, and share the pull request with us.
+The notebooks are intended to be run sequentially because later parts depend on processed outputs from earlier parts.
 
-### Required Documents your submission should include:
-1. All code and analysis files
-2. A reflection.md document containing: 
-   - Time spent on each section (E.g 8-10 days Task 1, 4-6 days Task 2) 
-   - Perceived difficulty of different components 
-   - Discussion of what worked well 
-   - Challenges encountered and how you addressed them 
-   - Any feedback on the assignment structure
+---
 
-# Technical Requirements
+## 5. Data expectations
 
-## Environment Setup
+### Task 1 input files
 
-We use uv for package management - a modern, fast Python package installer and resolver. 
+The Task 1 loader expects the following files in `data/input/`:
 
-The project.toml file in the repository specifies all required dependencies, ensuring everyone works with the same environment. 
+* `internship_data_matrix.csv`
+* `internship_feature_metadata.csv`
+* `intership_acquisition_list.csv`
+* `exogenous_standards.csv`
 
-The lock file contains the exact versions of the dependencies that were installed. After cloning the repository, simply run `uv sync` and uv will handle the rest, creating a clean, isolated environment for your work. More on uv can be found in the ressources section.
+Note: the acquisition list filename contains the original typo `intership_acquisition_list.csv`; the loader also supports a corrected fallback name if renamed later.
 
-Alternatively, you can use the requirements.txt file to install the dependencies with any package manager of your choice.
-The provided packages are not exhaustive, you are free to use any other package you deem necessary for your work.
+### Task 2 input files
 
-### Project Organization
+The Task 2 workflow expects the following files in `data/glycan_embedding/`:
 
-- Clear directory structure separating data, code, and results
-- Comprehensive README.md explaining setup and workflow
-- Well-documented code following PEP 8 guidelines
-- Proper error handling and input validation
+* `glycan_list.csv`
+* `df_glycan.pkl`
+* `glycan_binding.pkl`
+* `N_glycans_df.pkl`
 
-### Evaluation Criteria
+If the N-glycan file is named differently, the loader also checks common alternatives.
 
-- Analytical rigor and statistical soundness
-- Biological insight and interpretation depth
-- Code quality and reproducibility
-- Clear communication of methods and results
-- Creative problem
-- Solving approach
+---
 
-### Resources
-- [LC MS Experiment](https://pyopenms.readthedocs.io/en/latest/user_guide/background.html)
-- [D-Ratio](https://pmc.ncbi.nlm.nih.gov/articles/PMC10222478/)
-- [Coefficient of Variation](https://pmc.ncbi.nlm.nih.gov/articles/PMC3695475/)
-- [Glaycan Analysis](https://www.mdpi.com/2218-273X/13/4/605)
-- [Glycowork](https://github.com/BojarLab/glycowork)
-- [UV package manager](https://docs.astral.sh/uv/guides/projects/)
+## 6. Analysis workflow
+
+## Task 1 — Biomarker Discovery
+
+### Part A — Exploratory Data Analysis
+
+Notebook:
+
+* `01_task1_biomarker_discovery_partA_eda.ipynb`
+
+Core support code:
+
+* `src/eda.py`
+* `src/load_data.py`
+
+Main goals:
+
+* audit sample and feature alignment
+* reconstruct batch/run-order structure
+* inspect global sample signal behavior
+* assess QC stability and drift
+* analyze feature detection support across classes
+* inspect contamination using blanks and QC-like samples
+* check whether exogenous standards are detected consistently
+* review possible redundancy patterns such as isomer-like or adduct/isotope-like relationships
+
+Important analytical decision:
+
+* downstream biological discovery is restricted to **batch 1**, because batch 2 does not contain usable biological sample data for the target comparison workflow.
+
+### Part B — Data Processing
+
+Notebook:
+
+* `02_task1_biomarker_discovery_partB_processing.ipynb`
+
+Core support code:
+
+* `src/task1_processing.py`
+* `src/task1_filtering.py`
+* `src/task1_finalize.py`
+
+Main goals:
+
+* freeze the operational subset to batch 1
+* compare QC vs dQC behavior
+* define feature-level filtering criteria
+* review biological sample quality
+* apply transformations that improve comparability
+* retain a defensible sample and feature set for discrimination
+
+Typical filtering dimensions:
+
+* QC stability
+* detection support
+* contamination behavior
+* mass range relevance
+* sample-level signal quality
+
+### Part C — Discriminatory Analysis
+
+Notebook:
+
+* `03_task1_biomarker_discovery_partC_discriminatory_analysis.ipynb`
+
+Core support code:
+
+* `src/task1_discriminatory.py`
+* `src/task1_finalize.py`
+
+Main goals:
+
+* compare disease vs control tasks
+* compute univariate evidence
+* evaluate predictive signal using repeated cross-validation
+* account for redundancy among correlated LC-MS peaks
+* produce a prioritized biomarker shortlist
+
+Clinical tasks considered:
+
+* French vs Dunn
+* French vs LMU
+* LMU vs Dunn
+* three-class overview
+
+---
+
+## Task 2 — Biomarker Embedding
+
+Notebook:
+
+* `04_task2_biomarker_embedding.ipynb`
+
+Core support code:
+
+* `src/task2_embedding.py`
+
+Main goals:
+
+* audit and standardize glycan sources
+* canonicalize glycan sequence tables
+* build a reference/query/master union table
+* construct interpretable embedding features from sequence/composition/metadata
+* use glycan-binding data as enrichment
+* evaluate embedding quality using N-glycan controls
+* enrich discovered glycans with nearest-neighbor biological context
+
+The Task 2 implementation is designed to be robust to schema variation in the provided pickle/csv resources by:
+
+* detecting likely sequence columns
+* standardizing metadata names
+* tolerating alternative file names
+* handling both long and wide glycan-binding representations
+
+---
+
+## 7. Source code overview
+
+### `src/load_data.py`
+
+Repository-aware data loading utilities for Task 1.
+
+### `src/eda.py`
+
+EDA helpers for:
+
+* input auditing
+* run-order visualization
+* sample-level signal summaries
+* QC feature metrics
+* detection summaries
+* contamination-oriented diagnostics
+* standards monitoring
+
+### `src/task1_processing.py`
+
+Part B processing helpers for:
+
+* batch 1 operational subset freezing
+* QC vs dQC comparison
+* detection-oriented summaries
+* transformation support
+* filtering inputs
+
+### `src/task1_filtering.py`
+
+Biological sample review and sample-level quality diagnostics.
+
+### `src/task1_finalize.py`
+
+Feature redundancy annotation and final export-oriented processing.
+
+### `src/task1_discriminatory.py`
+
+Part C modeling helpers for:
+
+* PCA diagnostics
+* univariate evidence
+* repeated cross-validated linear models
+* feature prioritization
+
+### `src/task2_embedding.py`
+
+Task 2 utilities for:
+
+* glycan table standardization
+* input auditing
+* handoff construction from Task 1 to Task 2
+* canonical master table creation
+* embedding preparation and evaluation
+
+---
+
+## 8. Reproducibility notes
+
+* The project root is detected automatically by walking upward until `pyproject.toml` is found.
+* The notebooks are designed to call helper functions from `src/` rather than duplicating logic inline.
+* Intermediate outputs should be written to `data/processed/` so later steps can be reproduced without redoing the whole pipeline.
+* The work is intentionally split into interpretation-first notebooks and reusable code modules.
+
+---
+
+## 9. Expected outputs
+
+### Task 1
+
+Expected outputs include:
+
+* audited input summaries
+* EDA figures and interpretations
+* processed feature/sample manifests
+* transformed modeling matrices
+* discriminatory evidence tables
+* prioritized biomarker candidates
+
+### Task 2
+
+Expected outputs include:
+
+* cleaned glycan handoff table
+* canonical glycan reference/query/master tables
+* embedding evaluation summaries
+* enriched discovered glycan table with contextual annotations
+* nearest-neighbor or cluster-based biological interpretation
+
+---
+
+## 10. Reflection document
+
+Please see:
+
+* `reflection.md`
+
+This file documents:
+
+* time spent by section
+* perceived difficulty
+* what worked well
+* challenges encountered
+* how decisions were made
+* feedback on the assignment structure
+
+---
+
+## 11. Main implementation choices
+
+A few guiding principles shaped the repository:
+
+* **Analysis first, then automation**: exploratory work was used to motivate downstream filtering and modeling decisions.
+* **Batch-aware reasoning**: operational biological discovery was limited to batch 1.
+* **Technical vs biological separation**: QC behavior was used as the main technical reference.
+* **Redundancy-aware biomarker prioritization**: correlated LC-MS peaks were not treated as independent discoveries.
+* **Interpretable Task 2 baselines**: simple representation strategies were emphasized before more complex modeling.
+
+---
+
+## 12. Notes for the reviewer
+
+* The notebooks are the primary narrative deliverable.
+* The `src/` modules contain the reusable logic that supports the analyses.
+* The repository is organized to keep raw data, processed outputs, code, and interpretation clearly separated.
+* Where possible, decisions are implemented as explicit functions rather than one-off notebook code.
+
+---
+
+## 13. Acknowledgements / resources used
+
+This submission relies on:
+
+* the assignment-provided LC-MS and glycan datasets
+* the `glycowork` ecosystem for glycan-oriented data handling and analysis
+* standard Python scientific libraries for statistics, visualization, and machine learning
+
+---

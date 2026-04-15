@@ -1,0 +1,7 @@
+stage,n_features
+start,252
+mz>500,248
+mz>500 & QC_CV<30,197
+mz>500 & QC_CV<30 & bio_detection>=70_in_any_class,197
+main_retained_after_blank_veto,197
+high_confidence_retained_dratio_log<=1.0,54

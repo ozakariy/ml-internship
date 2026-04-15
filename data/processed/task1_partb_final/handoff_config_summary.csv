@@ -1,0 +1,6 @@
+setting,value
+selected_transform,tic_log1p
+operational_detection_threshold,10.0
+qc_cv_threshold,30.0
+bio_detection_threshold_any_class,0.7
+mz_threshold,500.0
