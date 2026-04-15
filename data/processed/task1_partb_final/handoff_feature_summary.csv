@@ -1,0 +1,7 @@
+metric,value
+n_features_total,252
+n_features_main_retained,197
+n_features_high_confidence,54
+n_main_features_with_potential_carryover_flag,3
+n_main_features_in_multifeature_clusters,193
+n_main_representative_features,30

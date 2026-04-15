@@ -1,0 +1,11 @@
+criterion_type,threshold,n_features
+qc_cv_threshold,20.0,35
+qc_cv_threshold,30.0,156
+qc_cv_threshold,40.0,217
+d_ratio_log_threshold,0.5,4
+d_ratio_log_threshold,0.75,11
+d_ratio_log_threshold,1.0,32
+d_ratio_log_threshold,1.25,65
+bio_detection_threshold,0.5,156
+bio_detection_threshold,0.7,156
+bio_detection_threshold,0.9,156

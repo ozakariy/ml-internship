@@ -1,0 +1,9 @@
+class,review_tier,n_samples
+Dunn,keep,24
+Dunn,minor_review,2
+Dunn,strong_review,1
+French,keep,23
+French,minor_review,3
+LMU,keep,22
+LMU,minor_review,2
+LMU,strong_review,2
